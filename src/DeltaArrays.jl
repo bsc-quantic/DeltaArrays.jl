@@ -4,7 +4,18 @@ using LinearAlgebra
 import Base: similar, copyto!, ndims, size, getindex, parent, real, imag
 import LinearAlgebra: diagzero, ishermitian, issymmetric, isposdef, factorize
 
-export DeltaArray
+export DeltaArray, delta, deltaind
+
+function deltaind(A::AbstractArray)
+    Base.require_one_based_indexing(A)
+    deltaind(size(A)[1:end-1]...)
+end
+
+deltaind(n::Integer...) = range(1, step=sum(cumprod(n), init=1), length=minimum(n))
+
+delta(i::Integer...) = allequal(i)
+
+delta(A::AbstractArray) = A[deltaind(A)]
 
 struct DeltaArray{T,N,V<:AbstractVector{T}} <: AbstractArray{T,N}
     data::V
@@ -24,6 +35,7 @@ DeltaArray{N}(v::AbstractVector{T}) where {T,N} = DeltaArray{T,N,typeof(v)}(v)
 # TODO maybe add `DeltaArray{N}(d::Diagonal)?`
 
 DeltaArray(M::AbstractMatrix) = DeltaArray(diag(M))
+DeltaArray(A::AbstractArray) = DeltaArray(delta(A))
 
 DeltaArray(D::DeltaArray) = D
 
