@@ -29,6 +29,13 @@ end
 
 DeltaArray{T,N,V}(D::DeltaArray) where {T,N,V<:AbstractVector{T}} = DeltaArray{T,N,V}(D.data)
 
+function Base.promote_rule(A::Type{<:DeltaArray{<:Any,N,V}}, B::Type{<:DeltaArray{<:Any,N,W}}) where {N,V,W}
+    X = promote_type(V, W)
+    T = eltype(X)
+    isconcretetype(T) && return DeltaArray{T,N,X}
+    return typejoin(A, B)
+end
+
 """
     DeltaArray(V::AbstractVector)
 
