@@ -128,8 +128,22 @@ julia> delta(A)
 DeltaArray(A::AbstractArray) = DeltaArray(delta(A))
 
 DeltaArray(D::DeltaArray) = D
+DeltaArray{T}(D::DeltaArray) where {T} = D
+DeltaArray{T,N}(D::DeltaArray) where {T,N} = DeltaArray{T,N}(D.data)
 
-# ...
+AbstractArray{T}(D::DeltaArray) where {T} = DeltaArray{T}(D)
+AbstractArray{T,N}(D::DeltaArray) where {T,N} = DeltaArray{T,N}(D)
+Array(D::DeltaArray{T,N}) where {T,N} = Array{promote_type(T, typeof(zero(T)))}(D)
+function Array{T,N}(D::DeltaArray) where {T,N}
+    n = size(D, 1)
+    B = zeros(T, ntuple(_ -> n, N))
+    @inbounds for i in 1:n
+        # TODO revise if `ntuple` is performance optimal
+        # alternative could be to use `B[delta(B)] .= D.data`
+        B[ntuple(_ -> i, N)...] = D.data[i]
+    end
+    return B
+end
 
 """
     DeltaArray{T,N}(undef,n)
