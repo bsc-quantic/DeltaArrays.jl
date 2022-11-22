@@ -194,7 +194,15 @@ end
 
 parent(D::DeltaArray) = D.data
 
-# TODO ishermitian, issymmetric, isposdef, factorize for DeltaArray{T,2}
+# NOTE `DeltaArrays` are always symmetric because they are invariant under permutations of its dims
+ishermitian(D::DeltaArray{<:Real}) = true
+ishermitian(D::DeltaArray{<:Number}) = isreal(D.data)
+ishermitian(D::DeltaArray) = all(ishermitian, D.data)
+issymmetric(D::DeltaArray{<:Number}) = true
+issymmetric(D::DeltaArray) = all(issymmetric, D.data)
+isposdef(D::DeltaArray) = all(isposdef, D.data)
+
+factorize(D::DeltaArray) = D
 
 real(D::DeltaArray) = DeltaArray{ndims(D)}(real(D.data))
 imag(D::DeltaArray) = DeltaArray{ndims(D)}(imag(D.data))
