@@ -28,13 +28,95 @@ end
 
 DeltaArray{T,N,V}(D::DeltaArray) where {T,N,V<:AbstractVector{T}} = DeltaArray{T,N,V}(D.data)
 
+"""
+    DeltaArray(V::AbstractVector)
+
+Construct a matrix with `V` as its diagonal.
+
+See also [`delta`](@ref).
+
+# Examples
+```jldoctest
+julia> DeltaArray([1, 10, 100])
+3×3 DeltaArray{$Int, 2, Vector{$Int}}:
+ 1   0    0
+ 0  10    0
+ 0   0  100
+```
+"""
+Diagonal(V::AbstractVector)
+
 # `N`=2 by default, equivalent to diagonal
 DeltaArray(v::AbstractVector{T}) where {T} = DeltaArray{T,2,typeof(v)}(v)
 DeltaArray(d::Diagonal) = DeltaArray(diag(v))
 DeltaArray{N}(v::AbstractVector{T}) where {T,N} = DeltaArray{T,N,typeof(v)}(v)
 # TODO maybe add `DeltaArray{N}(d::Diagonal)?`
 
+"""
+    DeltaArray(M::AbstractMatrix)
+
+Constructs a matrix from the diagonal of `M`.
+
+# Note
+The resulting `DeltaArray` should in a similar way to a `Diagonal` object.
+
+# Examples
+```jldoctest
+julia> A = permutedims(reshape(1:15, 5, 3))
+3×5 Matrix{$Int}:
+  1   2   3   4   5
+  6   7   8   9  10
+ 11  12  13  14  15
+
+julia> DeltaArray(A)
+3×3 DeltaArray{$Int, 2, Vector{$Int}}:
+ 1  0   0
+ 0  7   0
+ 0  0  13
+
+julia> delta(A)
+3-element Vector{$Int}:
+  1
+  7
+ 13
+"""
 DeltaArray(M::AbstractMatrix) = DeltaArray(diag(M))
+
+"""
+    DeltaArray(A::AbstractArray)
+
+Constructs an array from the diagonal of `A`.
+
+# Examples
+```jldoctest
+julia> A = reshape(1:16, 2, 2, 2, 2)
+2×2×2×2 reshape(::UnitRange{$Int}, 2, 2, 2, 2) with eltype $Int:
+[:, :, 1, 1] =
+ 1  3
+ 2  4
+
+[:, :, 2, 1] =
+ 5  7
+ 6  8
+
+[:, :, 1, 2] =
+  9  11
+ 10  12
+
+[:, :, 2, 2] =
+ 13  15
+ 14  16
+
+julia> DeltaArray(A)
+2×2 DeltaArray{$Int, 2, Vector{Int64}}:
+ 1   0
+ 0  16
+
+julia> delta(A)
+2-element Vector{$Int}:
+  1
+ 16
+"""
 DeltaArray(A::AbstractArray) = DeltaArray(delta(A))
 
 DeltaArray(D::DeltaArray) = D
@@ -43,6 +125,7 @@ DeltaArray(D::DeltaArray) = D
 
 """
     DeltaArray{T,N}(undef,n)
+
 Construct an uninitialized `DeltaArray{T,N}` of order `N` and length `n`.
 """
 DeltaArray{T,N}(::UndefInitializer, n::Integer) where {T,N} = DeltaArray{N}(Vector{T}(undef, n))
