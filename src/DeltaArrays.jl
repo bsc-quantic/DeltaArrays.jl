@@ -2,6 +2,7 @@ module DeltaArrays
 
 using LinearAlgebra
 import Base: similar, copyto!, ndims, size, getindex, parent, real, imag
+import Base: -, +, ==
 import LinearAlgebra: diagzero, ishermitian, issymmetric, isposdef, factorize
 
 export DeltaArray, delta, deltaind
