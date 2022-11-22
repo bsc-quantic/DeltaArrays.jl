@@ -186,8 +186,11 @@ function setindex!(D::DeltaArray, v, i::Int...)
     return v
 end
 
-## TODO structured matrix methods
-# function Base.replace_in_print_matrix(D::DeltaArray, i..., s)
+# NOTE not working/used currently
+## structured matrix methods ##
+# function Base.replace_in_print_matrix(D::DeltaArray{<:Any,2}, i::Integer, j::Integer, s::AbstractString)
+#     allequal(i) ? s : Base.replace_with_centered_mark(s)
+# end
 
 parent(D::DeltaArray) = D.data
 
