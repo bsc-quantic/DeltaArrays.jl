@@ -214,9 +214,51 @@ isdiag(D::DeltaArray) = all(isdiag, D.data)
 isdiag(D::DeltaArray{<:Number}) = true
 # TODO istriu, istril, triu!, tril!
 
-(==)(Da::DeltaArray, Db::DeltaArray) = DeltaArray() # TODO
+# NOTE the following method is not well defined and is susceptible for change
+function (==)(Da::DeltaArray, Db::DeltaArray)
+    @boundscheck ndims(Da) != ndims(Db) && throw(DimensionMismatch("a has dims $(ndims(Da)) and b has $(ndims(Db))"))
+    return Da.data == Db.data
+end
+
 (-)(D::DeltaArray) = DeltaArray{ndims(D)}(-D.data)
-(+)(Da::DeltaArray, Db::DeltaArray) = DeltaArray{ndims(D)}() # TODO
+
+# NOTE the following method is not well defined and is susceptible for change
+function (+)(Da::DeltaArray, Db::DeltaArray)
+    @boundscheck ndims(Da) != ndims(Db) && throw(DimensionMismatch("a has dims $(ndims(Da)) and b has $(ndims(Db))"))
+    return DeltaArray{ndims(Da)}(Da.data + Db.data)
+end
+
+# NOTE the following method is not well defined and is susceptible for change
+function (-)(Da::DeltaArray, Db::DeltaArray)
+    @boundscheck ndims(Da) != ndims(Db) && throw(DimensionMismatch("a has dims $(ndims(Da)) and b has $(ndims(Db))"))
+    return DeltaArray{ndims(Da)}(Da.data - Db.data)
+end
+
+for f in (:+, :-)
+    @eval function $f(D::DeltaArray{<:Any,2}, S::Symmetric)
+        return Symmetric($f(D, S.data), sym_uplo(S.uplo))
+    end
+    @eval function $f(S::Symmetric, D::DeltaArray{<:Any,2})
+        return Symmetric($f(S.data, D), sym_uplo(S.uplo))
+    end
+    @eval function $f(D::DeltaArray{<:Real,2}, H::Hermitian)
+        return Hermitian($f(D, H.data), sym_uplo(H.uplo))
+    end
+    @eval function $f(H::Hermitian, D::DeltaArray{<:Real,2})
+        return Hermitian($f(H.data, D), sym_uplo(H.uplo))
+    end
+end
+
+(*)(x::Number, D::DeltaArray) = DeltaArray{ndims(D)}(x * D.data)
+(*)(D::DeltaArray, x::Number) = DeltaArray{ndims(D)}(D.data * x)
+(/)(D::DeltaArray, x::Number) = DeltaArray{ndims(D)}(D.data / x)
+(\)(x::Number, D::DeltaArray) = DeltaArray{ndims(D)}(x \ D.data)
+(^)(D::DeltaArray, a::Number) = DeltaArray{ndims(D)}(D.data .^ a)
+(^)(D::DeltaArray, a::Real) = DeltaArray{ndims(D)}(D.data .^ a) # for disambiguation
+(^)(D::DeltaArray, a::Integer) = DeltaArray{ndims(D)}(D.data .^ a) # for disambiguation
+Base.literal_pow(::typeof(^), D::DeltaArray, valp::Val) = DeltaArray{ndims(D)}(Base.literal_pow.(^, D.data, valp)) # for speed
+Base.literal_pow(::typeof(^), D::DeltaArray, valp::Val{-1}) = inv(D) # for disambiguation
+
 # TODO ...
 
 end
