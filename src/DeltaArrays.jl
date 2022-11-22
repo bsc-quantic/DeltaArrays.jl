@@ -125,7 +125,7 @@ julia> delta(A)
   1
  16
 """
-DeltaArray(A::AbstractArray) = DeltaArray(delta(A))
+DeltaArray(A::AbstractArray) = DeltaArray{ndims(A)}(delta(A))
 
 DeltaArray(D::DeltaArray) = D
 DeltaArray{T}(D::DeltaArray) where {T} = D
