@@ -3,7 +3,7 @@ module DeltaArrays
 using LinearAlgebra
 import Base: similar, copyto!, ndims, size, getindex, parent, real, imag
 import Base: -, +, ==
-import LinearAlgebra: diagzero, ishermitian, issymmetric, isposdef, factorize, Array
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, Array
 
 export DeltaArray, delta, deltaind
 
@@ -168,12 +168,12 @@ size(D::DeltaArray) = ntuple(_ -> __nvalues(D), ndims(D))
     if allequal(i)
         @inbounds r = D.data[first(i)]
     else
-        r = diagzero(D, i...)
+        r = deltazero(D, i...)
     end
     r
 end
-diagzero(::DeltaArray{T}, i...) where {T} = zero(T)
-diagzero(D::DeltaArray{<:AbstractArray{T,N}}, i...) where {T,N} = zeros(T, (size(D.data[j], n) for (j, n) in zip(i, 1:N))...)
+deltazero(::DeltaArray{T}, i...) where {T} = zero(T)
+deltazero(D::DeltaArray{<:AbstractArray{T,N}}, i...) where {T,N} = zeros(T, (size(D.data[j], n) for (j, n) in zip(i, 1:N))...)
 
 # TODO put type to i... to be `Integer`?
 function setindex!(D::DeltaArray, v, i...)
