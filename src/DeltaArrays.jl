@@ -2,9 +2,9 @@ module DeltaArrays
 
 using LinearAlgebra
 import Core: Array
-import Base: similar, copyto!, ndims, size, getindex, setindex!, parent, real, imag
+import Base: similar, copyto!, ndims, size, getindex, setindex!, parent, real, imag, iszero, isone
 import Base: -, +, ==
-import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag
 
 export DeltaArray, delta, deltaind
 
@@ -207,6 +207,12 @@ factorize(D::DeltaArray) = D
 
 real(D::DeltaArray) = DeltaArray{ndims(D)}(real(D.data))
 imag(D::DeltaArray) = DeltaArray{ndims(D)}(imag(D.data))
+
+iszero(D::DeltaArray) = all(iszero, D.data)
+isone(D::DeltaArray) = all(isone, D.data)
+isdiag(D::DeltaArray) = all(isdiag, D.data)
+isdiag(D::DeltaArray{<:Number}) = true
+# TODO istriu, istril, triu!, tril!
 
 (==)(Da::DeltaArray, Db::DeltaArray) = DeltaArray() # TODO
 (-)(D::DeltaArray) = DeltaArray{ndims(D)}(-D.data)
