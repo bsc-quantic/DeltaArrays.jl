@@ -163,7 +163,7 @@ ndims(D::DeltaArray{T,N}) where {T,N} = N
 size(D::DeltaArray) = ntuple(_ -> __nvalues(D), ndims(D))
 
 # TODO put type to i... to be `Integer`?
-@inline function getindex(D::DeltaArray, i...)
+@inline function getindex(D::DeltaArray, i::Integer...)
     @boundscheck checkbounds(D, i...)
     if allequal(i)
         @inbounds r = D.data[first(i)]
