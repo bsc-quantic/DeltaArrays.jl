@@ -1,7 +1,7 @@
 module DeltaArrays
 
 using LinearAlgebra
-import Base: similar, copyto!, ndims, size, getindex, parent, real, imag
+import Base: similar, copyto!, ndims, size, getindex, setindex!, parent, real, imag
 import Base: -, +, ==
 import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, Array
 
@@ -176,9 +176,9 @@ deltazero(::DeltaArray{T}, i...) where {T} = zero(T)
 deltazero(D::DeltaArray{<:AbstractArray{T,N}}, i...) where {T,N} = zeros(T, (size(D.data[j], n) for (j, n) in zip(i, 1:N))...)
 
 # TODO put type to i... to be `Integer`?
-function setindex!(D::DeltaArray, v, i...)
+function setindex!(D::DeltaArray, v, i::Int...)
     @boundscheck checkbounds(D, i...)
-    if allequal(i...)
+    if allequal(i)
         @inbounds D.data[first(i)] = v
     elseif !iszero(v)
         throw(ArgumentError("cannot set off-diagonal entry ($(i...)) to a nonzero value ($v)"))
