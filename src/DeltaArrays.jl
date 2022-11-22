@@ -1,9 +1,10 @@
 module DeltaArrays
 
 using LinearAlgebra
+import Core: Array
 import Base: similar, copyto!, ndims, size, getindex, setindex!, parent, real, imag
 import Base: -, +, ==
-import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, Array
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize
 
 export DeltaArray, delta, deltaind
 
