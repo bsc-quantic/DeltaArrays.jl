@@ -134,7 +134,7 @@ DeltaArray{T,N}(D::DeltaArray) where {T,N} = DeltaArray{T,N}(D.data)
 AbstractArray{T}(D::DeltaArray) where {T} = DeltaArray{T}(D)
 AbstractArray{T,N}(D::DeltaArray) where {T,N} = DeltaArray{T,N}(D)
 Array(D::DeltaArray{T,N}) where {T,N} = Array{promote_type(T, typeof(zero(T)))}(D)
-function Array{T,N}(D::DeltaArray) where {T,N}
+function Base.Array{T,N}(D::DeltaArray) where {T,N}
     n = size(D, 1)
     B = zeros(T, ntuple(_ -> n, N))
     @inbounds for i in 1:n
