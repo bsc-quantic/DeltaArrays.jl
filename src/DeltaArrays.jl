@@ -3,9 +3,9 @@ module DeltaArrays
 using LinearAlgebra
 using LinearAlgebra: sym_uplo
 import Core: Array
-import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, adjoint, transpose, permutedims
+import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, adjoint, transpose, permutedims, inv
 import Base: -, +, ==, *, /, \, ^
-import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv
 
 export DeltaArray, delta, deltaind
 
@@ -289,6 +289,51 @@ for f in (:exp, :cis, :log, :sqrt,
     @eval Base.$f(D::DeltaArray) = DeltaArray{ndims(D)}($f.(D.data))
 end
 
+function inv(D::DeltaArray{T,N}) where {T,N}
+    Di = similar(D.data, typeof(inv(oneunit(T))))
+    for i = 1:length(D.data)
+        if iszero(D.data[i])
+            throw(SingularException(i))
+        end
+        Di[i] = inv(D.data[i])
+    end
+    DeltaArray{N}(Di)
 end
+
+function pinv(D::DeltaArray{T,N}) where {T,N}
+    Di = similar(D.data, typeof(inv(oneunit(T))))
+    for i = 1:length(D.data)
+        if !iszero(D.data[i])
+            invD = inv(D.data[i])
+            if isfinite(invD)
+                Di[i] = invD
+                continue
+            end
+        end
+        # fallback
+        Di[i] = zero(T)
+    end
+    DeltaArray{N}(Di)
+end
+
+function pinv(D::DeltaArray{T,N}, tol::Real) where {T,N}
+    Di = similar(D.data, typeof(inv(oneunit(T))))
+    if !isempty(D.data)
+        maxabsD = maximum(abs, D.data)
+        for i = 1:length(D.data)
+            if abs(D.data[i]) > tol * maxabsD
+                invD = inv(D.data[i])
+                if isfinite(invD)
+                    Di[i] = invD
+                    continue
+                end
+            end
+            # fallback
+            Di[i] = zero(T)
+        end
+    end
+    DeltaArray{N}(Di)
+end
+
 
 end
