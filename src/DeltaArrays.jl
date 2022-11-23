@@ -3,7 +3,7 @@ module DeltaArrays
 using LinearAlgebra
 using LinearAlgebra: sym_uplo
 import Core: Array
-import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, adjoint, transpose, permutedims, inv
+import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, adjoint, transpose, permutedims, inv, sum
 import Base: -, +, ==, *, /, \, ^
 import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd
 
@@ -399,6 +399,9 @@ function svd(D::DeltaArray{T,2}) where {T<:Number}
     end
     return SVD(U, S, Vt)
 end
+
+sum(A::DeltaArray) = sum(A.data)
+sum(A::DeltaArray{<:Any,N}, dims::Integer) where {N} = N <= 1 ? sum(A.data) : DeltaArray{N - 1}(A.data)
 
 
 
