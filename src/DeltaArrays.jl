@@ -3,7 +3,7 @@ module DeltaArrays
 using LinearAlgebra
 import Core: Array
 import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone
-import Base: -, +, ==
+import Base: -, +, ==, *, /, \, ^
 import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag
 
 export DeltaArray, delta, deltaind
