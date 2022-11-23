@@ -5,7 +5,7 @@ using LinearAlgebra: sym_uplo
 import Core: Array
 import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, adjoint, transpose, permutedims, inv
 import Base: -, +, ==, *, /, \, ^
-import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, svdvals
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd
 
 export DeltaArray, delta, deltaind
 
@@ -340,13 +340,66 @@ eigvals(D::DeltaArray{<:Number,2}; permute::Bool=true, scale::Bool=true) = copy(
 eigvals(D::DeltaArray{<:Any,2}; permute::Bool=true, scale::Bool=true) = copy(D.data)
 eigvecs(D::DeltaArray{<:Any,2}) = Matrix{eltype(D)}(I, size(D))
 
-# TODO eigen
+function eigen(D::DeltaArray{<:Any,2}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=nothing)
+    if any(!isfinite, D.data)
+        throw(ArgumentError("matrix contains Infs or NaNs"))
+    end
+
+    Td = Base.promote_op(/, eltype(D), eltype(D))
+    λ = eigvals(D)
+    if !isnothing(sortby)
+        p = sortperm(λ; alg=QuickSort, by=sortby)
+        λ = λ[p]
+    end
+    evecs = Matrix{Td}(I, size(D))
+    Eigen(λ, evecs)
+end
+
+function eigen(Da::DeltaArray{<:Any,2}, Db::DeltaArray{<:Any,2}; sortby::Union{Function,Nothing}=nothing)
+    if any(!isfinite, Da.data) || any(!isfinite, Db.data)
+        throw(ArgumentError("matrices contain Infs or NaNs"))
+    end
+    if any(iszero, Db.data)
+        throw(ArgumentError("right-hand side diagonal matrix is singular"))
+    end
+    return GeneralizedEigen(eigen(Db \ Da; sortby)...)
+end
+
+function eigen(A::AbstractMatrix, D::DeltaArray{<:Any,2}; sortby::Union{Function,Nothing}=nothing)
+    if any(iszero, D.data)
+        throw(ArgumentError("right-hand side diagonal matrix is singular"))
+    end
+    if size(A, 1) == size(A, 2) && isdiag(A)
+        return eigen(DeltaArray(A), D; sortby)
+    elseif ishermitian(A)
+        S = promote_type(LinearAlgebra.eigtype(eltype(A)), eltype(D))
+        return eigen!(eigencopy_oftype(Hermitian(A), S), DeltaArray{S,2}(D); sortby)
+    else
+        S = promote_type(LinearAlgebra.eigtype(eltype(A)), eltype(D))
+        return eigen!(eigencopy_oftype(A, S), DeltaArray{S,2}(D); sortby)
+    end
+end
 
 # Singular system
 svdvals(D::DeltaArray{<:Number,2}) = sort!(abs.(D.data), rev=true)
 svdvals(D::DeltaArray{<:Any,2}) = [svdvals(v) for v in D.data]
 
-# TODO svd
+function svd(D::DeltaArray{T,2}) where {T<:Number}
+    d = D.data
+    s = abs.(d)
+    piv = sortperm(s, rev=true)
+    S = s[piv]
+    Td = typeof(oneunit(T) / oneunit(T))
+    U = zeros(Td, size(D))
+    Vt = copy(U)
+    for i in 1:length(d)
+        j = piv[i]
+        U[j, i] = d[j] / S[i]
+        Vt[i, j] = one(Td)
+    end
+    return SVD(U, S, Vt)
+end
+
 
 
 end
