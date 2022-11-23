@@ -404,5 +404,8 @@ sum(A::DeltaArray) = sum(A.data)
 sum(A::DeltaArray{<:Any,N}, dims::Integer) where {N} = N <= 1 ? sum(A.data) : DeltaArray{N - 1}(A.data)
 
 
+function Base.muladd(A::DeltaArray{<:Any,2}, B::DeltaArray{<:Any,2}, z::DeltaArray{<:Any,2})
+    DeltaArray{2}(A.data .* B.data .+ z.data)
+end
 
 end
