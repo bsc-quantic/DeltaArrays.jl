@@ -127,7 +127,7 @@ julia> delta(A)
   1
  16
 """
-DeltaArray(A::AbstractArray) = DeltaArray{ndims(A)}(delta(A))
+DeltaArray(A::AbstractArray{<:Any,N}) where {N} = DeltaArray{N}(delta(A))
 
 DeltaArray(D::DeltaArray) = D
 DeltaArray{T}(D::DeltaArray) where {T} = D
@@ -161,7 +161,7 @@ copyto!(D1::DeltaArray, D2::DeltaArray) = (copyto!(D1.data, D2.data); D1)
 
 __nvalues(D::DeltaArray) = length(D.data)
 
-size(D::DeltaArray) = ntuple(_ -> __nvalues(D), ndims(D))
+size(D::DeltaArray{<:Any,N}) where {N} = ntuple(_ -> __nvalues(D), N)
 
 # TODO put type to i... to be `Integer`?
 @inline function getindex(D::DeltaArray, i::Int...)
@@ -205,8 +205,8 @@ isposdef(D::DeltaArray) = all(isposdef, D.data)
 
 factorize(D::DeltaArray) = D
 
-real(D::DeltaArray) = DeltaArray{ndims(D)}(real(D.data))
-imag(D::DeltaArray) = DeltaArray{ndims(D)}(imag(D.data))
+real(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(real(D.data))
+imag(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(imag(D.data))
 
 iszero(D::DeltaArray) = all(iszero, D.data)
 isone(D::DeltaArray) = all(isone, D.data)
@@ -220,7 +220,7 @@ function (==)(Da::DeltaArray, Db::DeltaArray)
     return Da.data == Db.data
 end
 
-(-)(D::DeltaArray) = DeltaArray{ndims(D)}(-D.data)
+(-)(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(-D.data)
 
 # NOTE the following method is not well defined and is susceptible for change
 function (+)(Da::DeltaArray, Db::DeltaArray)
@@ -249,23 +249,23 @@ for f in (:+, :-)
     end
 end
 
-(*)(x::Number, D::DeltaArray) = DeltaArray{ndims(D)}(x * D.data)
-(*)(D::DeltaArray, x::Number) = DeltaArray{ndims(D)}(D.data * x)
-(/)(D::DeltaArray, x::Number) = DeltaArray{ndims(D)}(D.data / x)
-(\)(x::Number, D::DeltaArray) = DeltaArray{ndims(D)}(x \ D.data)
-(^)(D::DeltaArray, a::Number) = DeltaArray{ndims(D)}(D.data .^ a)
-(^)(D::DeltaArray, a::Real) = DeltaArray{ndims(D)}(D.data .^ a) # for disambiguation
-(^)(D::DeltaArray, a::Integer) = DeltaArray{ndims(D)}(D.data .^ a) # for disambiguation
-Base.literal_pow(::typeof(^), D::DeltaArray, valp::Val) = DeltaArray{ndims(D)}(Base.literal_pow.(^, D.data, valp)) # for speed
+(*)(x::Number, D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(x * D.data)
+(*)(D::DeltaArray{<:Any,N}, x::Number) where {N} = DeltaArray{N}(D.data * x)
+(/)(D::DeltaArray{<:Any,N}, x::Number) where {N} = DeltaArray{N}(D.data / x)
+(\)(x::Number, D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(x \ D.data)
+(^)(D::DeltaArray{<:Any,N}, a::Number) where {N} = DeltaArray{N}(D.data .^ a)
+(^)(D::DeltaArray{<:Any,N}, a::Real) where {N} = DeltaArray{N}(D.data .^ a) # for disambiguation
+(^)(D::DeltaArray{<:Any,N}, a::Integer) where {N} = DeltaArray{N}(D.data .^ a) # for disambiguation
+Base.literal_pow(::typeof(^), D::DeltaArray{<:Any,N}, valp::Val) where {N} = DeltaArray{N}(Base.literal_pow.(^, D.data, valp)) # for speed
 Base.literal_pow(::typeof(^), D::DeltaArray, valp::Val{-1}) = inv(D) # for disambiguation
 
 # TODO ...
 
-conj(D::DeltaArray) = DeltaArray{ndims(D)}(conj(D.data))
+conj(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(conj(D.data))
 transpose(D::DeltaArray{<:Number}) = D
-transpose(D::DeltaArray) = DeltaArray{ndims(D)}(transpose.(D.data))
+transpose(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(transpose.(D.data))
 adjoint(D::DeltaArray{<:Number}) = conj(D)
-adjoint(D::DeltaArray) = DeltaArray{ndims(D)}(adjoint.(D.data))
+adjoint(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(adjoint.(D.data))
 permutedims(D::DeltaArray) = D
 permutedims(D::DeltaArray, perm) = (Base.checkdims_perm(D, D, perm); D)
 
@@ -286,7 +286,7 @@ for f in (:exp, :cis, :log, :sqrt,
     :cosh, :sinh, :tanh, :csch, :sech, :coth,
     :acos, :asin, :atan, :acsc, :asec, :acot,
     :acosh, :asinh, :atanh, :acsch, :asech, :acoth)
-    @eval Base.$f(D::DeltaArray) = DeltaArray{ndims(D)}($f.(D.data))
+    @eval Base.$f(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}($f.(D.data))
 end
 
 function inv(D::DeltaArray{T,N}) where {T,N}
