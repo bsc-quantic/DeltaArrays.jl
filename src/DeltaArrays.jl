@@ -281,5 +281,14 @@ function logabsdet(A::DeltaArray)
     mapreduce(x -> (log(abs(x)), sign(x)), ((d1, s1), (d2, s2)) -> (d1 + d2, s1 * s2), A.data)
 end
 
+for f in (:exp, :cis, :log, :sqrt,
+    :cos, :sin, :tan, :csc, :sec, :cot,
+    :cosh, :sinh, :tanh, :csch, :sech, :coth,
+    :acos, :asin, :atan, :acsc, :asec, :acot,
+    :acosh, :asinh, :atanh, :acsch, :asech, :acoth)
+    @eval Base.$f(D::DeltaArray) = DeltaArray{ndims(D)}($f.(D.data))
+end
+
+end
 
 end
