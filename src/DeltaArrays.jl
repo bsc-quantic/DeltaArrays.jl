@@ -2,7 +2,7 @@ module DeltaArrays
 
 using LinearAlgebra
 import Core: Array
-import Base: similar, copyto!, ndims, size, getindex, setindex!, parent, real, imag, iszero, isone
+import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone
 import Base: -, +, ==
 import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag
 
@@ -160,7 +160,6 @@ copyto!(D1::DeltaArray, D2::DeltaArray) = (copyto!(D1.data, D2.data); D1)
 
 __nvalues(D::DeltaArray) = length(D.data)
 
-ndims(D::DeltaArray{T,N}) where {T,N} = N
 size(D::DeltaArray) = ntuple(_ -> __nvalues(D), ndims(D))
 
 # TODO put type to i... to be `Integer`?
