@@ -337,7 +337,7 @@ end
 
 # Eigensystem
 eigvals(D::DeltaArray{<:Number,2}; permute::Bool=true, scale::Bool=true) = copy(D.data)
-eigvals(D::DeltaArray{<:Any,2}; permute::Bool=true, scale::Bool=true) = copy(D.data)
+eigvals(D::DeltaArray{<:Any,2}; permute::Bool=true, scale::Bool=true) = eigvals.(D.data)
 eigvecs(D::DeltaArray{<:Any,2}) = Matrix{eltype(D)}(I, size(D))
 
 function eigen(D::DeltaArray{<:Any,2}; permute::Bool=true, scale::Bool=true, sortby::Union{Function,Nothing}=nothing)
