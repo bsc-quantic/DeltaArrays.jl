@@ -5,7 +5,7 @@ using LinearAlgebra: sym_uplo
 import Core: Array
 import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, adjoint, transpose, permutedims, inv
 import Base: -, +, ==, *, /, \, ^
-import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, svdvals
 
 export DeltaArray, delta, deltaind
 
@@ -334,6 +334,19 @@ function pinv(D::DeltaArray{T,N}, tol::Real) where {T,N}
     end
     DeltaArray{N}(Di)
 end
+
+# Eigensystem
+eigvals(D::DeltaArray{<:Number,2}; permute::Bool=true, scale::Bool=true) = copy(D.data)
+eigvals(D::DeltaArray{<:Any,2}; permute::Bool=true, scale::Bool=true) = copy(D.data)
+eigvecs(D::DeltaArray{<:Any,2}) = Matrix{eltype(D)}(I, size(D))
+
+# TODO eigen
+
+# Singular system
+svdvals(D::DeltaArray{<:Number,2}) = sort!(abs.(D.data), rev=true)
+svdvals(D::DeltaArray{<:Any,2}) = [svdvals(v) for v in D.data]
+
+# TODO svd
 
 
 end
