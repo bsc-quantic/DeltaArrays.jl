@@ -54,7 +54,7 @@ julia> DeltaArray([1, 10, 100])
  0   0  100
 ```
 """
-Diagonal(V::AbstractVector)
+DeltaArray(V::AbstractVector)
 
 # `N`=2 by default, equivalent to diagonal
 DeltaArray(v::AbstractVector{T}) where {T} = DeltaArray{T,2,typeof(v)}(v)
