@@ -1,6 +1,7 @@
 module DeltaArrays
 
 using LinearAlgebra
+using LinearAlgebra: sym_uplo
 import Core: Array
 import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone
 import Base: -, +, ==, *, /, \, ^
