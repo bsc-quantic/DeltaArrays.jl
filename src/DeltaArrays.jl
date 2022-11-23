@@ -5,7 +5,7 @@ using LinearAlgebra: sym_uplo
 import Core: Array
 import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, adjoint, transpose, permutedims
 import Base: -, +, ==, *, /, \, ^
-import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet
 
 export DeltaArray, delta, deltaind
 
@@ -268,5 +268,18 @@ adjoint(D::DeltaArray{<:Number}) = conj(D)
 adjoint(D::DeltaArray) = DeltaArray{ndims(D)}(adjoint.(D.data))
 permutedims(D::DeltaArray) = D
 permutedims(D::DeltaArray, perm) = (Base.checkdims_perm(D, D, perm); D)
+
+# TODO diag
+
+tr(D::DeltaArray) = sum(tr, D.data)
+det(D::DeltaArray) = prod(det, D.data)
+function logdet(D::DeltaArray{<:Complex})
+    z = sum(log, D.data)
+    complex(real(z), rem2pi(imag(z), RoundNearest))
+end
+function logabsdet(A::DeltaArray)
+    mapreduce(x -> (log(abs(x)), sign(x)), ((d1, s1), (d2, s2)) -> (d1 + d2, s1 * s2), A.data)
+end
+
 
 end
