@@ -285,7 +285,7 @@ Base.literal_pow(::typeof(^), D::DeltaArray, valp::Val{-1}) = inv(D) # for disam
 function checkmulsize(A, B)
     nA = size(A, 2)
     mB = size(B, 1)
-    nA == mB || throw(DimensionMismatch("second dimension of A, $nA$, does not match first dimension of B, $mB"))
+    nA == mB || throw(DimensionMismatch("second dimension of A, $nA, does not match first dimension of B, $mB"))
     return nothing
 end
 
