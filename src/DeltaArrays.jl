@@ -354,7 +354,17 @@ adjoint(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(adjoint.(D.data))
 permutedims(D::DeltaArray) = D
 permutedims(D::DeltaArray, perm) = (Base.checkdims_perm(D, D, perm); D)
 
-# TODO diag
+function diag(D::DeltaArray{T,2}, k::Integer=0) where {T}
+    # every branch call similar(..., ::Int) to make sure the
+    # same vector type is returned independent of k
+    if k == 0
+        return copyto!(similar(D.data, length(D.data)), D.data)
+    elseif -size(D, 1) <= k <= size(D, 1)
+        return fill!(similar(D.data, size(D, 1) - abs(k)), zero(T))
+    else
+        throw(ArgumentError("requested diagonal, $k, must be at least $(-size(D, 1)) and at most $(size(D, 2)) for an $(size(D, 1))-by-$(size(D, 2)) matrix"))
+    end
+end
 
 tr(D::DeltaArray) = sum(tr, D.data)
 det(D::DeltaArray) = prod(det, D.data)
