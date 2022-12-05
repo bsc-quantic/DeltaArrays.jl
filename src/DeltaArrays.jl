@@ -5,7 +5,7 @@ using LinearAlgebra: sym_uplo
 import Core: Array
 import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, conj!, adjoint, transpose, permutedims, inv, sum
 import Base: -, +, ==, *, /, \, ^
-import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd, istriu, istril, triu!, tril!
 
 export DeltaArray, delta, deltaind
 
@@ -212,7 +212,28 @@ iszero(D::DeltaArray) = all(iszero, D.data)
 isone(D::DeltaArray) = all(isone, D.data)
 isdiag(D::DeltaArray) = all(isdiag, D.data)
 isdiag(D::DeltaArray{<:Number}) = true
-# TODO istriu, istril, triu!, tril!
+istriu(D::DeltaArray{<:Any,2}, k::Integer=0) = k <= 0 || iszero(D.data) ? true : false
+istril(D::DeltaArray{<:Any,2}, k::Integer=0) = k >= 0 || iszero(D.data) ? true : false
+
+function triu!(D::DeltaArray{T,2}, k::Integer=0) where {T}
+    n = size(D, 1)
+    if !(-n + 1 <= k <= n + 1)
+        throw(ArgumentError("the requested diagonal, $k, must be at least $(-n + 1) and at most $(n + 1) in an $n-by-$n matrix"))
+    elseif k > 0
+        fill!(D.data, zero(T))
+    end
+    return D
+end
+
+function tril!(D::DeltaArray{T,2}, k::Integer=0) where {T}
+    n = size(D, 1)
+    if !(-n + 1 <= k <= n + 1)
+        throw(ArgumentError("the requested diagonal, $k, must be at least $(-n + 1) and at most $(n + 1) in an $n-by-$n matrix"))
+    elseif k < 0
+        fill!(D.data, zero(T))
+    end
+    return D
+end
 
 # NOTE the following method is not well defined and is susceptible for change
 function (==)(Da::DeltaArray, Db::DeltaArray)
