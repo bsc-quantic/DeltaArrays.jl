@@ -4,7 +4,7 @@ using LinearAlgebra: LinearAlgebra, sym_uplo, AdjointAbsVec, TransposeAbsVec, Ab
 import Core: Array
 import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, conj!, adjoint, transpose, permutedims, inv, sum, kron, kron!
 import Base: -, +, ==, *, /, \, ^
-import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd, istriu, istril, triu!, tril!
+import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, diag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd, istriu, istril, triu!, tril!
 
 export DeltaArray, delta, deltaind
 
