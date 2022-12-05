@@ -1,7 +1,6 @@
 module DeltaArrays
 
-using LinearAlgebra
-using LinearAlgebra: sym_uplo
+using LinearAlgebra: LinearAlgebra, sym_uplo, AdjointAbsVec, TransposeAbsVec, AbstractTriangular
 import Core: Array
 import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, conj!, adjoint, transpose, permutedims, inv, sum, kron, kron!
 import Base: -, +, ==, *, /, \, ^
@@ -485,6 +484,17 @@ function svd(D::DeltaArray{T,2}) where {T<:Number}
     end
     return SVD(U, S, Vt)
 end
+
+# disambiguation methods: * and / of DeltaArray{<:Any,2} and Adj/Trans AbsVec
+*(u::AdjointAbsVec, D::DeltaArray{<:Any,2}) = (D'u')'
+*(u::TransposeAbsVec, D::DeltaArray{<:Any,2}) = transpose(transpose(D) * transpose(u))
+*(x::AdjointAbsVec, D::DeltaArray{<:Any,2}, y::AbstractVector) = _mapreduce_prod(*, x, D, y)
+*(x::TransposeAbsVec, D::DeltaArray{<:Any,2}, y::AbstractVector) = _mapreduce_prod(*, x, D, y)
+/(u::AdjointAbsVec, D::DeltaArray{<:Any,2}) = (D' \ u')'
+/(u::TransposeAbsVec, D::DeltaArray{<:Any,2}) = transpose(transpose(D) \ transpose(u))
+# disambiguation methods: Call unoptimized version for user defined AbstractTriangular.
+*(A::AbstractTriangular, D::DeltaArray{<:Any,2}) = @invoke *(A::AbstractMatrix, D::DeltaArray{<:Any,2})
+*(D::DeltaArray{<:Any,2}, A::AbstractTriangular) = @invoke *(D::DeltaArray{<:Any,2}, A::AbstractMatrix)
 
 sum(A::DeltaArray) = sum(A.data)
 sum(A::DeltaArray{<:Any,N}, dims::Integer) where {N} = N <= 1 ? sum(A.data) : DeltaArray{N - 1}(A.data)
