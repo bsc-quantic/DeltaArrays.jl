@@ -496,6 +496,26 @@ end
 *(A::AbstractTriangular, D::DeltaArray{<:Any,2}) = @invoke *(A::AbstractMatrix, D::DeltaArray{<:Any,2})
 *(D::DeltaArray{<:Any,2}, A::AbstractTriangular) = @invoke *(D::DeltaArray{<:Any,2}, A::AbstractMatrix)
 
+dot(A::DeltaArray{<:Any,2}, B::DeltaArray{<:Any,2}) = dot(A.data, B.data)
+function dot(D::DeltaArray{<:Any,2}, B::AbstractMatrix)
+    size(D) == size(B) || throw(DimensionMismatch("Matrix sizes $(size(D)) and $(size(B)) differ"))
+    return dot(D.data, view(B, deltaind(B)))
+end
+dot(A::AbstractMatrix, B::DeltaArray{<:Any,2}) = conj(dot(B, A))
+
+function _mapreduce_prod(f, x, D::DeltaArray{<:Any,2}, y)
+    if !(length(x) == length(D.data) == length(y))
+        throw(DimensionMismatch("x has length $(length(x)), D has size $(size(D)), and y has $(length(y))"))
+    end
+    if isempty(x) && isempty(D) && isempty(y)
+        return zero(promote_op(f, eltype(x), eltype(D), eltype(y)))
+    else
+        return mapreduce(t -> f(t[1], t[2], t[3]), +, zip(x, D.data, y))
+    end
+end
+
+# TODO cholesky
+
 sum(A::DeltaArray) = sum(A.data)
 sum(A::DeltaArray{<:Any,N}, dims::Integer) where {N} = N <= 1 ? sum(A.data) : DeltaArray{N - 1}(A.data)
 
