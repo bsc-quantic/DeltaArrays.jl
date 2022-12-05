@@ -850,7 +850,7 @@ function _mapreduce_prod(f, x, D::DeltaArray{<:Any,2}, y)
         throw(DimensionMismatch("x has length $(length(x)), D has size $(size(D)), and y has $(length(y))"))
     end
     if isempty(x) && isempty(D) && isempty(y)
-        return zero(promote_op(f, eltype(x), eltype(D), eltype(y)))
+        return zero(Base.promote_op(f, eltype(x), eltype(D), eltype(y)))
     else
         return mapreduce(t -> f(t[1], t[2], t[3]), +, zip(x, D.data, y))
     end
