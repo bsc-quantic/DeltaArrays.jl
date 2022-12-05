@@ -280,6 +280,23 @@ end
 Base.literal_pow(::typeof(^), D::DeltaArray{<:Any,N}, valp::Val) where {N} = DeltaArray{N}(Base.literal_pow.(^, D.data, valp)) # for speed
 Base.literal_pow(::typeof(^), D::DeltaArray, valp::Val{-1}) = inv(D) # for disambiguation
 
+function checkmulsize(A, B)
+    nA = size(A, 2)
+    mB = size(B, 1)
+    nA == mB || throw(DimensionMismatch("second dimension of A, $nA$, does not match first dimension of B, $mB"))
+    return nothing
+end
+
+function (*)(Da::DeltaArray{<:Any,2}, Db::DeltaArray{<:Any,2})
+    checkmulsize(Da, Db)
+    return DeltaArray{2}(Da.data .* Db.data)
+end
+
+function (*)(Da::DeltaArray{<:Any,2}, V::AbstractVector)
+    checkmulsize(Da, V)
+    return D.data .* V
+end
+
 # TODO ...
 
 kron(A::DeltaArray{<:Any,N}, B::DeltaArray{<:Any,M}) where {N,M} = DeltaArray{N + M}(kron(A.data, B.data))
