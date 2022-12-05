@@ -1,0 +1,14 @@
+name: Deploy to Julia Registry
+on:
+  release:
+    types: released
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Register Julia Package
+      uses: julia-actions/RegisterAction@v0.3.1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
