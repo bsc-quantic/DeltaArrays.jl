@@ -1,8 +1,8 @@
 module DeltaArrays
 
-using LinearAlgebra: LinearAlgebra, sym_uplo, AdjointAbsVec, TransposeAbsVec, AbstractTriangular, AbstractVecOrMat, HermOrSym, QRCompactWYQ, QRPackedQ
+using LinearAlgebra: LinearAlgebra, sym_uplo, AdjointAbsVec, TransposeAbsVec, AbstractTriangular, AbstractVecOrMat, HermOrSym, QRCompactWYQ, QRPackedQ, Diagonal, Symmetric, Hermitian, Tridiagonal, AdjOrTransAbsMat, Adjoint, Transpose, SymTridiagonal, UpperTriangular, LowerTriangular, UnitUpperTriangular, UnitLowerTriangular
 import Core: Array
-import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, conj!, adjoint, transpose, permutedims, inv, sum, kron, kron!
+import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, conj!, adjoint, transpose, permutedims, inv, sum, kron, kron!, @propagate_inbounds, @invoke
 import Base: -, +, ==, *, /, \, ^
 import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, diag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd, istriu, istril, triu!, tril!, lmul!, rmul!, ldiv!, rdiv!
 
