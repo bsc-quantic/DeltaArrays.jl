@@ -3,7 +3,7 @@ module DeltaArrays
 using LinearAlgebra
 using LinearAlgebra: sym_uplo
 import Core: Array
-import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, adjoint, transpose, permutedims, inv, sum
+import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, conj!, adjoint, transpose, permutedims, inv, sum
 import Base: -, +, ==, *, /, \, ^
 import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd
 
@@ -262,6 +262,7 @@ Base.literal_pow(::typeof(^), D::DeltaArray, valp::Val{-1}) = inv(D) # for disam
 # TODO ...
 
 conj(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(conj(D.data))
+conj!(D::DeltaArray) = conj!(D.data)
 transpose(D::DeltaArray{<:Number}) = D
 transpose(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(transpose.(D.data))
 adjoint(D::DeltaArray{<:Number}) = conj(D)
