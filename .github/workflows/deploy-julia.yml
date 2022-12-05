@@ -3,6 +3,10 @@ on:
   release:
     types: released
   workflow_dispatch:
+    inputs:
+        version:
+          description: Version to register or component to bump
+          required: true
 
 jobs:
   deploy:
