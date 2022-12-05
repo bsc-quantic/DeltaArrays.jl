@@ -3,7 +3,7 @@ module DeltaArrays
 using LinearAlgebra
 using LinearAlgebra: sym_uplo
 import Core: Array
-import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, conj!, adjoint, transpose, permutedims, inv, sum
+import Base: similar, copyto!, size, getindex, setindex!, parent, real, imag, iszero, isone, conj, conj!, adjoint, transpose, permutedims, inv, sum, kron, kron!
 import Base: -, +, ==, *, /, \, ^
 import LinearAlgebra: ishermitian, issymmetric, isposdef, factorize, isdiag, tr, det, logdet, logabsdet, pinv, eigvals, eigvecs, eigen, svdvals, svd, istriu, istril, triu!, tril!
 
@@ -282,6 +282,69 @@ Base.literal_pow(::typeof(^), D::DeltaArray{<:Any,N}, valp::Val) where {N} = Del
 Base.literal_pow(::typeof(^), D::DeltaArray, valp::Val{-1}) = inv(D) # for disambiguation
 
 # TODO ...
+
+kron(A::DeltaArray{<:Any,N}, B::DeltaArray{<:Any,M}) where {N,M} = DeltaArray{N + M}(kron(A.data, B.data))
+
+function kron(A::DeltaArray{<:Any,2}, B::SymTridiagonal)
+    kdv = kron(delta(A), B.dv)
+    # We don't need to drop the last element
+    kev = kron(delta(A), LinearAlgebra._pushzero(LinearAlgebra._evview(B)))
+    SymTridiagonal(kdv, kev)
+end
+
+function kron(A::DeltaArray{<:Any,2}, B::Tridiagonal)
+    # `_droplast!` is only guaranteed to work with `Vector`
+    kd = LinearAlgebra._makevector(kron(delta(A), B.d))
+    kdl = LinearAlgebra._droplast!(LinearAlgebra._makevector(kron(delta(A), LinearAlgebra._pushzero(B.dl))))
+    kdu = LinearAlgebra._droplast!(LinearAlgebra._makevector(kron(delta(A), LinearAlgebra._pushzero(B.du))))
+    Tridiagonal(kdl, kd, kdu)
+end
+
+@inline function kron!(C::AbstractMatrix, A::DeltaArray{<:Any,2}, B::AbstractMatrix)
+    require_one_based_indexing(B)
+    (mA, nA) = size(A)
+    (mB, nB) = size(B)
+    (mC, nC) = size(C)
+    @boundscheck (mC, nC) == (mA * mB, nA * nB) ||
+                 throw(DimensionMismatch("expect C to be a $(mA * mB)x$(nA * nB) matrix, got size $(mC)x$(nC)"))
+    isempty(A) || isempty(B) || fill!(C, zero(A[1, 1] * B[1, 1]))
+    m = 1
+    @inbounds for j = 1:nA
+        A_jj = A[j, j]
+        for k = 1:nB
+            for l = 1:mB
+                C[m] = A_jj * B[l, k]
+                m += 1
+            end
+            m += (nA - 1) * mB
+        end
+        m += mB
+    end
+    return C
+end
+
+@inline function kron!(C::AbstractMatrix, A::AbstractMatrix, B::DeltaArray{<:Any})
+    require_one_based_indexing(A)
+    (mA, nA) = size(A)
+    (mB, nB) = size(B)
+    (mC, nC) = size(C)
+    @boundscheck (mC, nC) == (mA * mB, nA * nB) ||
+                 throw(DimensionMismatch("expect C to be a $(mA * mB)x$(nA * nB) matrix, got size $(mC)x$(nC)"))
+    isempty(A) || isempty(B) || fill!(C, zero(A[1, 1] * B[1, 1]))
+    m = 1
+    @inbounds for j = 1:nA
+        for l = 1:mB
+            Bll = B[l, l]
+            for k = 1:mA
+                C[m] = A[k, j] * Bll
+                m += nB
+            end
+            m += 1
+        end
+        m -= nB
+    end
+    return C
+end
 
 conj(D::DeltaArray{<:Any,N}) where {N} = DeltaArray{N}(conj(D.data))
 conj!(D::DeltaArray) = conj!(D.data)
