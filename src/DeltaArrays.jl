@@ -19,6 +19,7 @@ deltaind(n::Integer...) = range(1, step=sum(cumprod(n), init=1), length=minimum(
 delta(i::Integer...) = allequal(i)
 
 delta(A::AbstractArray) = A[deltaind(A)]
+delta(D::DeltaArray) = D.data
 
 struct DeltaArray{T,N,V<:AbstractVector{T}} <: AbstractArray{T,N}
     data::V
