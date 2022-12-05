@@ -7,6 +7,8 @@ on:
         version:
           description: Version to register or component to bump
           required: true
+          
+permissions: write-all
 
 jobs:
   deploy:
