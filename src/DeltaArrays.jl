@@ -313,7 +313,7 @@ end
 
 function inv(D::DeltaArray{T,N}) where {T,N}
     Di = similar(D.data, typeof(inv(oneunit(T))))
-    for i = 1:length(D.data)
+    for i in 1:length(D.data)
         if iszero(D.data[i])
             throw(SingularException(i))
         end
@@ -324,7 +324,7 @@ end
 
 function pinv(D::DeltaArray{T,N}) where {T,N}
     Di = similar(D.data, typeof(inv(oneunit(T))))
-    for i = 1:length(D.data)
+    for i in 1:length(D.data)
         if !iszero(D.data[i])
             invD = inv(D.data[i])
             if isfinite(invD)
@@ -342,7 +342,7 @@ function pinv(D::DeltaArray{T,N}, tol::Real) where {T,N}
     Di = similar(D.data, typeof(inv(oneunit(T))))
     if !isempty(D.data)
         maxabsD = maximum(abs, D.data)
-        for i = 1:length(D.data)
+        for i in 1:length(D.data)
             if abs(D.data[i]) > tol * maxabsD
                 invD = inv(D.data[i])
                 if isfinite(invD)
