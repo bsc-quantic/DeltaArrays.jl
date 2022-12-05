@@ -31,6 +31,8 @@ end
 
 DeltaArray{T,N,V}(D::DeltaArray) where {T,N,V<:AbstractVector{T}} = DeltaArray{T,N,V}(D.data)
 
+delta(D::DeltaArray) = D.data
+
 function Base.promote_rule(A::Type{<:DeltaArray{<:Any,N,V}}, B::Type{<:DeltaArray{<:Any,N,W}}) where {N,V,W}
     X = promote_type(V, W)
     T = eltype(X)
