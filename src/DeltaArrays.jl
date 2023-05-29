@@ -156,7 +156,7 @@ Construct an uninitialized `DeltaArray{T,N}` of order `N` and length `n`.
 DeltaArray{T,N}(::UndefInitializer, n::Integer) where {T,N} = DeltaArray{N}(Vector{T}(undef, n))
 
 similar(D::DeltaArray, ::Type{T}) where {T} = DeltaArray(similar(D.data, T))
-similar(::DeltaArray, ::Type{T}, dims) where {T} = zeros(T, dims...)
+similar(::DeltaArray, ::Type{T}, dims::Tuple{Vararg{Int,N}}) where {T, N} = zeros(T, dims...)
 
 copyto!(D1::DeltaArray, D2::DeltaArray) = (copyto!(D1.data, D2.data); D1)
 
